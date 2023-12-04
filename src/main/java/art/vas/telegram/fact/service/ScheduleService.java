@@ -1,9 +1,9 @@
 package art.vas.telegram.fact.service;
 
 import art.vas.telegram.fact.FactBot;
-import art.vas.telegram.fact.command.common.Commando;
 import art.vas.telegram.fact.command.HolidayCommand;
 import art.vas.telegram.fact.command.WeatherPhotoCommand;
+import art.vas.telegram.fact.command.common.Commando;
 import art.vas.telegram.fact.model.Users;
 import art.vas.telegram.fact.model.repo.UserRepo;
 import lombok.RequiredArgsConstructor;

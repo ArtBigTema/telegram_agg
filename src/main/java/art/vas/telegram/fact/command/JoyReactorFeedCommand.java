@@ -34,7 +34,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class JoyReactorFeedCommand implements Commando<SendMediaGroup> {
     public static final String url = "https://joyreactor.cc/";
-    public static final int MAX = 1_000_000;
     @Getter
     public final Map<Long, String> nextMsg = new HashMap<>();
     private final Map<Long, Integer> latestMsg = new HashMap<>();
@@ -46,13 +45,6 @@ public class JoyReactorFeedCommand implements Commando<SendMediaGroup> {
             list.add(Utils.safetyGet(() -> getImage(el)));
         }
         return list;
-    }
-
-    public static byte[] getAny(String src) {//element.select("div[class=image]")
-        if (StringUtils.contains(src, "comment")) return null;
-        src = StringUtils.prependIfMissing(src, "https:");
-
-        return Objects.requireNonNull(JsonConfig.restTemplate.getForObject(src, byte[].class));
     }
 
     public static byte[] getImage(Element element) {//element.select("div[class=image]")

@@ -1,6 +1,7 @@
 package art.vas.telegram.fact.service;
 
 import art.vas.telegram.fact.utils.Utils;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -40,7 +41,7 @@ public class ProxyService {
     @Value("${panda.proxy.url}")
     String pandaAiUrl;
 
-    //    @PostConstruct
+    @PostConstruct
     public void after() {
         after(Arrays.asList(
                 "45.167.124.170:999",

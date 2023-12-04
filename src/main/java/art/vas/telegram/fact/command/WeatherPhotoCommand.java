@@ -21,7 +21,7 @@ public class WeatherPhotoCommand implements Commando<SendPhoto> {
 
     @Override
     public SendPhoto answer(String chatId) {
-        SendMessage w = weatherCommand.answer(chatId);
+        SendMessage w = weatherCommand.answer(chatId, false);
         List<String> keys = weatherCommand.keys();
         SendPhoto photo = photoCommand.answer(chatId, keys);
         photo.setCaption(w.getText());

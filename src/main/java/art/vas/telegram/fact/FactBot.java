@@ -1,8 +1,8 @@
 package art.vas.telegram.fact;
 
+import art.vas.telegram.fact.command.ReduplicatorCommand;
 import art.vas.telegram.fact.command.common.CallBackMessageCommando;
 import art.vas.telegram.fact.command.common.Commando;
-import art.vas.telegram.fact.command.ReduplicatorCommand;
 import art.vas.telegram.fact.service.UserService;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.removeStart;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 @Component
 public class FactBot extends TelegramLongPollingBot {
@@ -60,9 +63,13 @@ public class FactBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String text = update.getMessage().getText();
             String[] strings = StringUtils.splitPreserveAllTokens(text, " \n");
-            Commando<?> commando = map.get(StringUtils.defaultIfBlank(strings[0], text));
+            String command = trim(StringUtils.prependIfMissing(strings[0], "/"));
+            Commando<?> commando = map.get(StringUtils.defaultIfBlank(command, text));
+
             if (Objects.isNull(commando)) {
-                commando = all;
+                commando = all; // если команда не определена то редупликатор или чат
+            }else { // иначе уберем префикс команды
+                update.getMessage().setText(trim(removeStart(text, strings[0])));
             }
             commando.takeIt(update, this);
         }

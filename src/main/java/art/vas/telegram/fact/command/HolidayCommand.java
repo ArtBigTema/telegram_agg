@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,10 @@ public class HolidayCommand implements SimpleMessageCommando {
     @Override
     public String getCommandLine() {
         return "/праздник";
+    }
+
+    public List<String> getCommandLines() {
+        return Arrays.asList(getCommandLine(), "/today", "holiday");
     }
 
     @Override

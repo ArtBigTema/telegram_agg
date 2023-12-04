@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public interface Commando<T extends PartialBotApiMethod<? extends Serializable>> {
     default String getCommandLine() {
@@ -42,6 +43,7 @@ public interface Commando<T extends PartialBotApiMethod<? extends Serializable>>
     }
 
     default List<Message> execute(PartialBotApiMethod<? extends Serializable> t, TelegramLongPollingBot bot) {
+        if (Objects.isNull(t)) return Collections.emptyList();
         try {
             switch (t) {
                 case SendMessage s -> {

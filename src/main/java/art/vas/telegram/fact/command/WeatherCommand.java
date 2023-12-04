@@ -55,6 +55,10 @@ public class WeatherCommand implements SimpleMessageCommando {
 
     @Override
     public SendMessage answer(String chatId) {
+        return answer(chatId, true);
+    }
+
+    public SendMessage answer(String chatId, boolean withSub) {
         JsonNode jsonNode = TODAY.get(LocalDate.now());
 
         if (Objects.isNull(jsonNode)) {
@@ -86,6 +90,9 @@ public class WeatherCommand implements SimpleMessageCommando {
         sb.append(", но ощущается как ").append(tom.get("feels_like")).append(".");
 
         sb.append(copyright);
+        if (withSub) {
+            sb.append("\nХотите подписаться на погоду? Нажмите /scheduleWeather");
+        }
 
         return new SendMessage(chatId, sb.toString());
     }
