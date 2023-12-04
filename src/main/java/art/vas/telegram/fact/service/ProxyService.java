@@ -90,14 +90,14 @@ public class ProxyService {
         int i = 0;
         int max = proxies.size() * 2;
         do {
-
+            if (i++ > max) break;
             try {
                 v = supplier.get();
             } catch (Exception e) {
                 if (size(proxies) > 1)
                     proxies.add(proxies.pop()); // next proxy
             }
-        } while (Objects.isNull(v) && i++ < max);
+        } while (Objects.isNull(v));
         if (i >= max) {
             proxies.clear();
             v = Utils.safetyGet(supplier);

@@ -4,28 +4,24 @@ import art.vas.telegram.fact.command.common.Commando;
 import art.vas.telegram.fact.service.ProxyService;
 import art.vas.telegram.fact.utils.Utils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.internal.guava.Preconditions;
 import org.jsoup.Jsoup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.io.ByteArrayInputStream;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
-import static art.vas.telegram.fact.config.JsonConfig.restTemplate;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
@@ -46,28 +42,6 @@ public class DalleImageCommand implements Commando<SendPhoto> {
     @Value("${open.ai.token}")
     String openAiToken;
 
-    @Value("${fusion.proxy.url}")
-    String fusionUrl;
-    @Value("${fusion.proxy.token}")
-    String fusionToken;
-    @Value("${fusion.proxy.secret}")
-    String fusionSecret;
-    private static int id = 4;
-
-    // @PostConstruct
-    public void post() {
-        HttpEntity<?> entity = new HttpEntity<>(CollectionUtils.toMultiValueMap(
-                Map.of("X-Secret", Collections.singletonList(fusionSecret),
-                        "X-Key", Collections.singletonList(fusionToken))));
-
-        ResponseEntity<ArrayNode> response = restTemplate.exchange(
-                fusionUrl + "models", HttpMethod.GET, entity, ArrayNode.class);
-//        Preconditions.checkArgument(response.getStatusCode().is2xxSuccessful());
-        id = Optional.ofNullable(Utils.safetyGet(() -> response
-                .getBody().iterator().next().get("id").asInt())).orElse(id);
-        // models
-    }
-
     @Override
     public String getCommandLine() {
         return "/дали";
@@ -85,12 +59,9 @@ public class DalleImageCommand implements Commando<SendPhoto> {
                         CONTENT_TYPE, singletonList(MediaType.APPLICATION_JSON))));
         ResponseEntity<JsonNode> forEntity = ProxyService.repeat(() -> proxyRestTemplate
                 .exchange(pandaAiUrl + "images/generations", HttpMethod.POST, entity, JsonNode.class));
+        Preconditions.checkState(forEntity.getStatusCode().is2xxSuccessful());
 
         String url = forEntity.getBody().findValue("url").asText();
-//        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET,
-//                new HttpEntity<>(null, toMultiValueMap(Map.of(
-//                        HOST, singletonList(URI.create(url).getHost())))),
-//                byte[].class);
         byte[] bytes = Utils.safetyGet(() -> Jsoup.connect(url) // todo restTemplate
                 .ignoreContentType(true).execute().bodyAsBytes());
 
