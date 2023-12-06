@@ -14,6 +14,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -60,14 +61,24 @@ public class JoyReactorTagCommand implements CallBackMessageCommando<SendMediaGr
 
     @Override
     @SneakyThrows
-    public SendMessage answer(Message message) {
+    public SendMessage answer(TelegramLongPollingBot bot, Message message) {
         command.nextMsg.clear();
 
+        String text = message.getText();
         Long chatId = message.getChatId();
-        String next = StringUtils.defaultString(nextMsg.remove(chatId));
 
-        Document doc = Jsoup.connect(JoyReactorFeedCommand.url + "tags/subscribers" + next).get();
-        Elements elements = doc.select("strong");
+        String next = StringUtils.defaultString(nextMsg.remove(chatId));
+        String resultSelect;
+        if (StringUtils.isNotBlank(text)) {
+            next = "search?q=" + UriUtils.encode(text, UTF_8);
+            resultSelect = "div[class=blog_pic_result]";
+        } else {
+            next = "tags/subscribers" + next;
+            resultSelect = "strong";
+        }
+
+        Document doc = Jsoup.connect(JoyReactorFeedCommand.url + next).get();
+        Elements elements = doc.select(resultSelect);
         List<String> links = elements.stream().map(s -> s.select("a").attr("href"))
                 .map(s -> StringUtils.substringAfter(s, "/tag/"))
                 .filter(s -> !StringUtils.contains(s, separator))
@@ -94,10 +105,5 @@ public class JoyReactorTagCommand implements CallBackMessageCommando<SendMediaGr
         nextMsg.put(chatId, separator + StringUtils.substringAfterLast(href, separator));
 
         return sendMessage;
-    }
-
-    @Override
-    public String getAnswer() {
-        return null;
     }
 }

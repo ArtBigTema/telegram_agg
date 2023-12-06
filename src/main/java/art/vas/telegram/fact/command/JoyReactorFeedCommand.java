@@ -15,6 +15,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriUtils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -28,6 +29,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 @Component
@@ -72,6 +75,12 @@ public class JoyReactorFeedCommand implements Commando<SendMediaGroup> {
             bot.executeAsync(new DeleteMessage(chatId.toString(), remove));
         }
         String next = nextMsg.getOrDefault(chatId, StringUtils.EMPTY);
+
+        String text = message.getText();
+        if (StringUtils.isNotBlank(text)) {
+            next = "search?q=" + UriUtils.encode(text, UTF_8);
+        }
+
         return getSendMediaGroup(chatId, next);
     }
 
